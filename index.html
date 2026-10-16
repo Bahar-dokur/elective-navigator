@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elective Navigator</title>
+<style>
+:root{
+  --bg:#f3f5f9; --panel:#ffffff; --ink:#0f1b33; --ink2:#4a5672; --ink3:#8590a8; --line:#e3e7ef;
+  --navy:#13223f; --navy2:#1c2f55; --brand:#2f5bea; --brand-soft:#e8eeff;
+  --ok:#14915f; --ok-soft:#e3f6ed; --warn:#b7791f; --warn-soft:#fdf3e1; --bad:#d23c3c; --bad-soft:#fdeaea;
+  --accent:#e26d3d; --accent2:#f08a4b;
+  --pA:#2f5bea; --pB:#8a4fd8; --pU:#0f9aa8;
+  --r:14px; --shadow:0 1px 2px rgba(15,27,51,.05),0 6px 18px rgba(15,27,51,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Inter,"Inter Display",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---------- sign in ---------- */
+#signin{min-height:100vh;display:grid;place-items:center;background:radial-gradient(1200px 500px at 50% -10%,#dfe7ff,transparent),var(--bg)}
+.card-in{width:400px;background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:34px 32px 26px;text-align:center;border-top:4px solid var(--brand)}
+.logo{width:68px;height:68px;border-radius:20px;margin:0 auto 14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),#5b7cff);color:#fff;box-shadow:0 8px 20px rgba(47,91,234,.3)}
+.card-in h1{font-size:22px;margin:0 0 4px}
+.card-in .sub{color:var(--ink2);margin:0 0 20px}
+.demo-note{background:var(--brand-soft);color:#2a44a8;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:14px}
+.field{display:flex;align-items:center;gap:10px;background:#f5f7fb;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:10px;text-align:left;color:var(--ink2)}
+.field b{color:var(--ink);font-weight:600}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:600;display:inline-flex;align-items:center;gap:8px;justify-content:center;transition:transform .12s, background .2s, box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{background:#2449c9}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{background:#f5f7fb}
+.btn-accent{background:#fff;color:var(--accent);}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.btn-block{width:100%;padding:12px}
+.fine{font-size:11.5px;color:var(--ink3);margin-top:16px}
+
+/* ---------- shell ---------- */
+#app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:var(--navy);color:#c9d3ea;padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;color:#fff;font-weight:700;font-size:15px}
+.brand .mini{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#5b7cff);display:grid;place-items:center}
+.brand small{display:block;font-weight:500;color:#8fa0c6;font-size:11.5px}
+.nav-h{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#7385ad;margin:16px 10px 6px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#c9d3ea;text-decoration:none;cursor:pointer;font-size:13.5px}
+.nav a:hover{background:var(--navy2)}
+.nav a.on{background:var(--brand);color:#fff}
+.nav a .new{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px}
+aside .foot{margin-top:auto;font-size:11px;color:#6f80a6;padding:10px}
+main{min-width:0}
+header{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 26px;position:sticky;top:0;z-index:5}
+header .term{background:var(--brand-soft);color:#2a44a8;font-weight:600;font-size:12px;padding:4px 10px;border-radius:20px}
+header .sp{flex:1}
+header .who{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:22px;padding:4px 12px 4px 4px;font-size:12.5px;font-weight:600}
+header .av{width:28px;height:28px;border-radius:50%;background:#dfe6fb;color:#2a44a8;display:grid;place-items:center;font-size:11px;font-weight:700}
+.page{padding:24px 26px 60px;max-width:1240px}
+.ph{display:flex;align-items:flex-end;gap:16px;margin-bottom:18px}
+.ph h2{margin:0;font-size:24px;letter-spacing:-.01em}
+.ph p{margin:4px 0 0;color:var(--ink2)}
+.ph .sp{flex:1}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kv{color:var(--ink3);font-size:12px;margin-top:8px}
+.kv b{display:block;color:var(--ink);font-size:13.5px;margin-top:1px}
+.ttl{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+.ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand)}
+.notice{background:linear-gradient(90deg,var(--brand),#4f73f5);color:#fff;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.notice b{font-weight:700}
+
+/* home elective card */
+.elec-card{grid-column:span 2;border:2px solid transparent;transition:border-color .3s, box-shadow .3s}
+.elec-card.glow{border-color:var(--accent);box-shadow:0 0 0 6px rgba(226,109,61,.12),var(--shadow)}
+.dots{display:flex;gap:6px;margin:12px 0 10px}
+.dot{flex:1;height:10px;border-radius:6px;background:#e9edf5}
+.dot.done{background:var(--ok)}
+.dot.now{background:var(--accent)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* ---------- planner ---------- */
+.summary-row{display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:14px;margin-bottom:16px}
+.stat{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:13px 16px}
+.stat .l{font-size:12px;color:var(--ink3)}
+.stat .v{font-weight:700;font-size:16px;margin-top:3px}
+.bar{height:7px;background:#edf0f6;border-radius:5px;overflow:hidden;margin-top:9px}
+.bar>i{display:block;height:100%;background:var(--brand);border-radius:5px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+
+.slots-wrap{margin-bottom:16px}
+.slots-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.slots-head h3{margin:0;font-size:16px}
+.slots-head .sp{flex:1}
+.slots{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
+.slot{border:1.5px dashed #cdd5e4;border-radius:12px;padding:10px 11px;min-height:118px;display:flex;flex-direction:column;gap:4px;background:#fbfcfe;position:relative;transition:all .35s}
+.slot .sl-top{display:flex;align-items:center;gap:6px}
+.slot .nm{font-weight:700;font-size:12.5px}
+.slot .meta{font-size:11px;color:var(--ink3)}
+.slot .crs{margin-top:auto;font-size:11.5px;font-weight:600;line-height:1.3}
+.slot .crs small{display:block;font-weight:500;color:var(--ink2)}
+.slot.done{border-style:solid;border-color:#bfe5d3;background:var(--ok-soft)}
+.slot.now{border-color:var(--accent);background:#fff8f3}
+.slot.now.filled{border-style:solid;background:#fff;border-color:var(--brand);box-shadow:0 0 0 3px rgba(47,91,234,.1)}
+.slot.plan{border-color:#d6c8f2;background:#faf7ff}
+.slot.plan.filled{border-style:solid}
+.slot.flash{animation:flash 1s}
+@keyframes flash{0%{transform:scale(1)}30%{transform:scale(1.05);box-shadow:0 0 0 8px rgba(47,91,234,.18)}100%{transform:scale(1)}}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.tA{background:#e8eeff;color:var(--pA)}
+.tB{background:#f1e9fc;color:var(--pB)}
+.tU{background:#e0f5f7;color:#0b7c88}
+.tOk{background:var(--ok-soft);color:var(--ok)}
+.tNow{background:#ffe9dd;color:#c4531f}
+.tPlan{background:#efe8fb;color:#6d3dc0}
+.tBad{background:var(--bad-soft);color:var(--bad)}
+.tWarn{background:var(--warn-soft);color:var(--warn)}
+.tGray{background:#eef1f6;color:var(--ink2)}
+.xbtn{position:absolute;top:6px;right:6px;border:0;background:transparent;color:var(--ink3);font-size:14px;line-height:1;padding:2px}
+
+.ai{background:linear-gradient(95deg,var(--accent),var(--accent2));color:#fff;border-radius:var(--r);padding:16px 18px;margin-bottom:16px;display:flex;flex-direction:column;gap:12px}
+.ai-top{display:flex;align-items:center;gap:12px}
+.ai-top .ic{background:rgba(255,255,255,.18);color:#fff}
+.ai-top h3{margin:0;font-size:16px}
+.ai-top p{margin:2px 0 0;font-size:12.5px;opacity:.9}
+.ai-top .sp{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.08);color:#fff;border-radius:20px;padding:6px 13px;font-weight:600;font-size:12.5px;display:inline-flex;gap:6px;align-items:center;transition:all .2s}
+.chip.on{background:#fff;color:var(--accent);border-color:#fff}
+
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 12px;height:40px}
+.search input{border:0;outline:0;flex:1;font:inherit;background:transparent}
+.toggle{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 12px;height:40px;font-weight:600;font-size:12.5px;color:var(--ink2);user-select:none;cursor:pointer}
+.toggle .sw{width:30px;height:18px;border-radius:10px;background:#d5dbe7;position:relative;transition:background .2s}
+.toggle .sw::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .2s}
+.toggle.on{color:var(--ink);border-color:#c8d3f5}
+.toggle.on .sw{background:var(--brand)}
+.toggle.on .sw::after{left:14px}
+.count{font-size:12.5px;color:var(--ink3);margin-left:auto}
+
+.list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cc{background:#fff;border-radius:13px;box-shadow:var(--shadow);padding:14px 15px;display:flex;flex-direction:column;gap:8px;border:1.5px solid transparent;transition:border-color .2s, transform .2s, opacity .3s}
+.cc:hover{border-color:#cfd8f3}
+.cc.dim{opacity:.6}
+.cc .r1{display:flex;align-items:flex-start;gap:8px}
+.cc .code{font-weight:800;font-size:13px}
+.cc .name{font-weight:600;font-size:13.5px;line-height:1.3}
+.cc .match{margin-left:auto;text-align:right;flex-shrink:0}
+.cc .match b{display:block;font-size:17px;color:var(--brand)}
+.cc .match span{font-size:10.5px;color:var(--ink3)}
+.cc .why{font-size:12px;color:var(--ink2);background:#f6f8fc;border-radius:8px;padding:7px 9px;line-height:1.45}
+.cc .why b{color:var(--ink)}
+.cc .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cc .when{font-size:12px;color:var(--ink2)}
+.cc .acts{display:flex;gap:8px;margin-top:auto;padding-top:2px}
+.cc .acts .btn{flex:1}
+.cc.added{border-color:var(--ok);background:#fbfffd}
+.empty{grid-column:1/-1;text-align:center;color:var(--ink3);padding:30px}
+
+/* drawer + modal */
+.scrim{position:fixed;inset:0;background:rgba(15,27,51,.38);backdrop-filter:blur(3px);z-index:20;opacity:0;transition:opacity .25s;pointer-events:none}
+.scrim.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:460px;background:#fff;z-index:21;box-shadow:-10px 0 40px rgba(15,27,51,.15);transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.drawer.show{transform:none}
+.dr-h{padding:22px 24px 14px;border-bottom:1px solid var(--line)}
+.dr-h .code{font-weight:800;color:var(--brand)}
+.dr-h h3{margin:4px 0 8px;font-size:20px}
+.dr-b{padding:18px 24px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+.dr-b h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+.dr-b p{margin:0;line-height:1.55;color:var(--ink2)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{background:#f6f8fc;border-radius:10px;padding:10px 12px}
+.fact span{font-size:11.5px;color:var(--ink3)}
+.fact b{display:block;margin-top:2px}
+.counts{display:flex;flex-direction:column;gap:6px}
+.counts div{display:flex;align-items:center;gap:8px;font-size:13px}
+.dr-f{padding:16px 24px;border-top:1px solid var(--line);display:flex;gap:10px}
+.dr-f .btn{flex:1}
+.slotpick{display:flex;flex-direction:column;gap:8px}
+.slotpick button{display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+.slotpick button:hover{border-color:var(--brand);background:#f7f9ff}
+.slotpick button small{color:var(--ink3);margin-left:auto}
+
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.98);opacity:0;z-index:22;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(15,27,51,.25);width:640px;max-width:calc(100vw - 32px);max-height:calc(100vh - 60px);overflow:auto;transition:all .28s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.modal.show{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.m-h{padding:22px 24px 6px;display:flex;gap:12px;align-items:flex-start}
+.m-h h3{margin:0;font-size:19px}
+.m-h p{margin:4px 0 0;color:var(--ink2)}
+.m-b{padding:12px 24px}
+.m-f{padding:12px 24px 22px;display:flex;justify-content:flex-end;gap:10px}
+.why-box{background:var(--bad-soft);border:1px solid #f6c9c9;color:#8f2525;border-radius:12px;padding:12px 14px;line-height:1.5}
+.why-box b{color:#7a1616}
+.alt{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:8px}
+.alt .name{font-weight:600}
+.alt .sub{font-size:12px;color:var(--ink2)}
+.alt .btn{margin-left:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11.5px;color:var(--ink3);text-align:left;font-weight:600;padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid #f0f2f7;font-size:13px}
+td.r,th.r{text-align:right}
+.checks{display:flex;flex-direction:column;gap:7px;margin-top:14px;background:var(--ok-soft);border-radius:12px;padding:12px 14px;color:#0f6e48;font-weight:600;font-size:13px}
+.checks div{display:flex;gap:8px;align-items:center}
+
+.toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;z-index:30;transition:all .3s;display:flex;gap:10px;align-items:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.sheet-wrap{display:grid;place-items:center;padding:10px 0}
+.sheet-wrap .fn{color:var(--ink2);font-size:13px;margin-bottom:10px}
+.sheet-wrap img{width:860px;max-width:100%;border-radius:12px;box-shadow:0 20px 50px rgba(15,27,51,.18)}
+.disclaimer{position:fixed;bottom:8px;right:12px;font-size:10.5px;color:var(--ink3);background:rgba(255,255,255,.85);padding:3px 8px;border-radius:6px;z-index:4}
+svg{flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ================= SIGN IN ================= -->
+<section id="signin">
+  <div class="card-in">
+    <div class="logo"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+    <h1>Elective Navigator</h1>
+    <p class="sub">Yaşar University · Software Engineering</p>
+    <div class="demo-note">Demo sign-in. No real account or password is used.</div>
+    <div class="field"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Student no <b style="margin-left:auto">23070005678</b></div>
+    <div class="field"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Program <b style="margin-left:auto">Software Eng. · Year 4</b></div>
+    <button id="btn-signin" class="btn btn-primary btn-block" style="margin-top:6px">Continue as demo student
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <a href="demo.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-weight:600;color:var(--brand);text-decoration:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch the 2-minute demo video</a>
+    <div class="fine">Course project prototype. Not the official Yaşar University system.<br>Curriculum from the 2025–26 Bologna listing; sections, seats and grades are demo data.</div>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<section id="app" class="hidden">
+  <aside>
+    <div class="brand"><div class="mini"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div><div>Elective Navigator<small>Course registration</small></div></div>
+    <div class="nav-h">General</div>
+    <nav class="nav">
+      <a data-go="home" class="on"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+      <a data-go="reg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Course Registration</a>
+      <a data-go="plan" id="nav-plan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>Elective Planner<span class="new">NEW</span></a>
+      <a><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M10 19V9M16 19v-6M22 19H2"/></svg>Grades &amp; Transcript</a>
+    </nav>
+    <div class="nav-h">Academic</div>
+    <nav class="nav">
+      <a><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>Curriculum</a>
+      <a><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Advisor messages</a>
+    </nav>
+    <div class="foot">Course project prototype · demo data</div>
+  </aside>
+  <main>
+    <header>
+      <b>Yaşar University</b><span class="term">2026–2027 Fall</span>
+      <span class="sp"></span>
+      <span style="color:var(--ink3);font-size:12.5px">Registration closes in <b style="color:var(--ink)">2 days 6 h</b></span>
+      <span class="who"><span class="av">DS</span>23070005678 · Demo Student</span>
+    </header>
+
+    <!-- HOME -->
+    <div id="pg-home" class="page">
+      <div class="notice"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span><b>Notice</b>&nbsp; Fall registration is open. You still have <b>3 elective slots</b> to fill this term — use the Elective Planner.</span></div>
+      <div class="grid4">
+        <div class="panel"><div class="ttl"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2"/><path d="M14 10h4M14 14h3"/></svg></span>Student</div>
+          <div class="kv">Student No<b>23070005678</b></div><div class="kv">Name<b>Demo Student</b></div><div class="kv">Advisor<b>Asst. Prof. Demo Advisor</b></div></div>
+        <div class="panel"><div class="ttl"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span>Program</div>
+          <div class="kv">Faculty<b>Engineering</b></div><div class="kv">Department<b>Software Engineering</b></div><div class="kv">Curriculum<b>2025 Bologna</b></div></div>
+        <div class="elec-card panel" id="home-elec"><div class="ttl"><span class="ic" style="background:#ffe9dd;color:var(--accent)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>Elective progress<span class="sp" style="flex:1"></span><span class="tag tNow">3 due this term</span></div>
+          <div class="dots" id="home-dots"></div>
+          <div class="legend"><span><i style="background:var(--ok)"></i>Completed (2)</span><span><i style="background:var(--accent)"></i>Due this term (3)</span><span><i style="background:#e9edf5"></i>Spring (3)</span></div>
+          <div style="display:flex;gap:10px;margin-top:14px;align-items:center"><span style="color:var(--ink2);font-size:12.5px">8 elective slots in your curriculum, from 3 different pools.</span><span style="flex:1"></span><button class="btn btn-primary btn-sm" id="btn-open-planner">Open Elective Planner</button></div>
+        </div>
+        <div class="panel"><div class="ttl"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>Academic</div>
+          <div class="kv">Semester<b>7 (Year 4)</b></div><div class="kv">GPA<b>3.12</b></div><div class="kv">ECTS completed<b>178 / 240</b></div></div>
+        <div class="panel"><div class="ttl"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Registration</div>
+          <div class="kv">Status<b id="home-status">Not submitted</b></div><div class="kv">Max ECTS<b>40 (GPA ≥ 2.00)</b></div></div>
+        <div class="panel"><div class="ttl"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg></span>Compulsory this term</div>
+          <div class="kv">Courses<b>5 courses · 19 ECTS</b></div><div class="kv">Added automatically<b>Yes</b></div></div>
+      </div>
+    </div>
+
+    <!-- REGISTRATION (light) -->
+    <div id="pg-reg" class="page hidden">
+      <div class="ph"><div><h2>Course Registration</h2><p>Compulsory courses for semester 7 are added automatically. Electives come from the Elective Planner.</p></div></div>
+      <div class="panel" id="reg-table"></div>
+    </div>
+
+    <!-- PLANNER -->
+    <div id="pg-plan" class="page hidden">
+      <div class="ph"><div><h2>Elective Planner</h2><p>Every elective slot in your curriculum, which pool it accepts, and courses that actually count for it.</p></div><span class="sp"></span>
+        <button class="btn btn-primary" id="btn-review"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Review &amp; submit</button></div>
+
+      <div class="summary-row">
+        <div class="stat"><div class="l">Elective slots done</div><div class="v" id="st-slots">2 / 8</div></div>
+        <div class="stat"><div class="l">Due this term</div><div class="v" id="st-now">0 / 3 filled</div></div>
+        <div class="stat"><div class="l">Clashes</div><div class="v" id="st-clash" style="color:var(--ok)">None</div></div>
+        <div class="stat"><div style="display:flex"><div class="l">Total ECTS this term</div><span style="flex:1"></span><b id="st-ects">19 / 40</b></div><div class="bar"><i id="st-bar" style="width:47.5%"></i></div></div>
+      </div>
+
+      <div class="panel slots-wrap">
+        <div class="slots-head"><h3>Your elective slots</h3>
+          <span class="tag tA">A pool · SE/COMP electives</span><span class="tag tB">B pool · cross-faculty</span><span class="tag tU">U · university electives</span>
+          <span class="sp"></span><button class="btn btn-ghost btn-sm" id="btn-spring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Draft my spring plan</button></div>
+        <div class="slots" id="slots"></div>
+      </div>
+
+      <div class="ai">
+        <div class="ai-top"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/><path d="M19 17l.8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8z"/></svg></span>
+          <div><h3>What are you interested in?</h3><p>Pick a few topics. Courses are ranked by your interests and by how well you did in the courses they build on.</p></div><span class="sp"></span>
+          <button class="btn btn-accent btn-sm" id="btn-autofill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/></svg>Auto-fill remaining slots</button></div>
+        <div class="chips" id="chips"></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8590a8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Search all electives by code or name (e.g. robot, web, SE 44)"></div>
+        <div class="toggle" id="tg-fit"><span class="sw"></span>Fits my timetable</div>
+        <div class="toggle" id="tg-seat"><span class="sw"></span>Seats available</div>
+        <div class="toggle" id="tg-term"><span class="sw"></span>Counts this term</div>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+
+    <div id="pg-sheet" class="page hidden"><div class="sheet-wrap"><div class="fn">⬇ elective-plan-23070005678.png</div><img id="sheet-img" alt="Elective plan"></div></div>
+  </main>
+</section>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer"></div>
+<div class="modal" id="modal"></div>
+<div class="toast" id="toast"></div>
+<div class="disclaimer">Course project prototype · not the official Yaşar University system</div>
+
+<script>
+/* ===================== DATA ===================== */
+// Curriculum & elective pools: Yaşar SE 2025-26 Bologna listing. Sections, seats, grades: demo data.
+const GRADES = {"MATH 2260":"AA","SE 2230":"AA","SE 2310":"BA","SE 2228":"BB","MATH 2255":"CB","SE 3332":"BA","SE 3310":"CC","SE 3317":"BB","SE 3318":"BA","SE 3355":"BA","SE 2226":"BB","SE 1108":"AA","COMP 1202":"BB"};
+const GP = {AA:4,BA:3.5,BB:3,CB:2.5,CC:2,DC:1.5,DD:1};
+const NAMES = {"MATH 2260":"Probability and Statistics","SE 2230":"Database Systems","SE 2310":"Data Structures and Algorithms","SE 2228":"Analysis and Design of Algorithms","MATH 2255":"Linear Algebra","SE 3332":"Low-Level Programming","SE 3310":"Operating Systems and Networks","SE 3317":"Software Design and Architecture","SE 3318":"Software Construction","SE 3355":"Web Programming","SE 2226":"Software Quality Assurance and Testing","SE 1108":"Programming and Problem Solving II","COMP 1202":"Discrete Computational Structures"};
+
+const COMPULSORY = [
+  {code:"ENGR 4411",name:"Engineering for Sustainable Development",ects:3,t:[["Mon","13:40","15:30"]]},
+  {code:"ISG 9210",name:"Occupational Health and Safety II",ects:2,t:[["Wed","08:40","10:30"]]},
+  {code:"SE 4910",name:"Graduation Project I",ects:8,t:[["Tue","13:40","16:30"]]},
+  {code:"UMFD 1720",name:"Career Planning",ects:2,t:[["Thu","12:40","14:30"]]},
+  {code:"SE 4830",name:"Internship",ects:4,t:[]},
+];
+
+const TOPICS = [
+  {id:"ai",label:"AI & Data"},{id:"robo",label:"Robotics & IoT"},{id:"web",label:"Web & Mobile"},
+  {id:"games",label:"Games & Graphics"},{id:"sec",label:"Security & Networks"},{id:"arch",label:"Architecture & Cloud"},
+  {id:"ux",label:"UX & Design"},{id:"mgmt",label:"Process & Management"},{id:"soc",label:"Business & Society"}
+];
+
+// code|name|ects|pool|tags|time (Fall section or "" = not offered this term)|seatsLeft/cap|buildsOn|desc
+const RAW = `
+COMP 4350|Introduction to Machine Learning|6|A|ai|Mon 09:40-12:30|12/40|MATH 2260,SE 2310|Supervised and unsupervised learning, model evaluation and practical ML pipelines in Python.
+COMP 4435|Introduction to Artificial Intelligence|6|A|ai|Wed 13:40-16:30|8/40|SE 2228|Search, knowledge representation, planning and reasoning under uncertainty.
+COMP 4444|Deep Learning|6|A|ai|Thu 09:40-12:30|0/40|MATH 2255,MATH 2260|Neural network architectures, training at scale, CNNs, RNNs and transformers.
+COMP 4462|Data Mining|6|A|ai|Fri 09:40-12:30|15/35|SE 2230,MATH 2260|Finding patterns in large datasets: clustering, association rules and classification.
+COMP 4441|Cybersecurity|6|A|sec|Tue 09:40-12:30|20/40|SE 3310|Threats, defenses, cryptography basics and secure system operation.
+COMP 4355|Computer Network Security|6|A|sec|Thu 14:40-17:30|18/40|SE 3310|Securing network protocols, firewalls, intrusion detection and VPNs.
+COMP 4433|Cloud Computing|6|A|arch|Wed 09:40-12:30|25/40|SE 3310|Virtualization, containers, cloud service models and deploying to the cloud.
+COMP 4460|Game Programming|6|A|games|Fri 13:40-16:30|6/30|SE 3318|Game loops, physics, engines and building a playable game in a team.
+COMP 4431|Computer Graphics|6|A|games|Mon 15:40-18:30|14/30|MATH 2255|Rendering pipeline, transformations, shading and real-time graphics with OpenGL.
+COMP 4340|Introduction to Robot Science|6|A|robo|Thu 09:40-12:30|10/30|MATH 2255|Kinematics, sensors and control fundamentals for robotic systems.
+EEE 4451|Introduction to Sensor Networks|6|A|robo|Tue 09:40-12:30|22/30|SE 3310|Wireless sensor nodes, data collection and energy-aware networking.
+SE 3306|Human-Computer Interaction|6|A|ux|Mon 15:40-18:30|9/40|SE 3355|Designing and evaluating interactive systems around real users.
+SE 3315|Software Project Management|6|A|mgmt|Thu 09:40-12:30|24/40|SE 2226|Planning, estimation, risk and team management for software projects.
+SE 3352|Agile Software Engineering|6|A|mgmt|Wed 13:40-16:30|30/50|SE 3318|Scrum, Kanban, user stories and continuous delivery in practice.
+SE 3356|Database Design and Implementation|6|A|ai,arch|Thu 14:40-17:30|11/40|SE 2230|Advanced schema design, indexing, transactions and query optimization.
+SE 3358|User Interface Design|6|A|ux,web|Fri 09:40-12:30|3/35|SE 3355|Visual design, prototyping and usability testing of user interfaces.
+SE 4406|Mobile Robotics Programming|6|A|robo|Wed 13:40-16:30|7/25|SE 3332|Programming mobile robots with ROS: localization, mapping and navigation.
+SE 4456|Object-Oriented Design Patterns|6|A|arch|Tue 09:40-12:30|16/40|SE 3317|Gang-of-Four patterns and how to apply them in real code bases.
+SE 4458|System Architecture for Large-Scale Systems|6|A|arch|Mon 09:40-12:30|19/40|SE 3317|Scalability, distributed architectures, caching and microservices.
+SE 4462|Secure Software Design and Programming|6|A|sec|Thu 14:40-17:30|12/40|SE 3318|Writing code that resists attacks: threat modeling, OWASP, secure coding.
+SE 4467|Applied Internet of Things|6|A|robo|Fri 13:40-16:30|9/30|SE 3310,SE 3332|Building connected devices end to end, from sensors to cloud dashboards.
+SE 4468|Scalable Web Programming|6|A|web,arch|Mon 15:40-18:30|21/40|SE 3355|Building web back ends that scale: APIs, queues, caching and load.
+SE 4475|Introduction to Natural Language Processing|6|A|ai|Wed 09:40-12:30|13/40|SE 2310|Text processing, language models and NLP applications.
+SE 4481|Mobile Software Development|6|A|web|Thu 09:40-12:30|4/35|SE 3355|Native and cross-platform mobile app development.
+SE 4483|Business Intelligence Systems|6|A|ai,soc|Fri 09:40-12:30|17/40|SE 2230|Data warehouses, dashboards and decision support for organizations.
+SE 4486|AI for Games|6|A|games,ai|Fri 13:40-16:30|10/30|SE 2228|Pathfinding, decision making and learning agents in games.
+SE 4488|Introduction to Reinforcement Learning|6|A|ai,robo|Tue 14:40-17:30|8/30|MATH 2260|Agents that learn by trial and error: MDPs, Q-learning, policy gradients.
+SE 4489|Multi-Robot Systems|6|A|robo|Mon 09:40-12:30|5/25|SE 3332|Coordination, swarm behaviour and communication among multiple robots.
+SE 4490|Introduction to Deep Learning|6|A|ai|Tue 13:40-16:30|11/40|MATH 2255,MATH 2260|Practical deep learning with modern frameworks.
+SE 3355|Web Programming|6|A|web|Mon 09:40-12:30|14/40||Front-end and back-end web development.
+SE 3353|Critical Systems Engineering|6|A|arch|||SE 2226|Engineering safety- and mission-critical software.
+SE 3360|Agent-Based Simulation|6|A|ai|||SE 2310|Modelling complex systems with interacting agents.
+SE 3362|E-Commerce|6|A|web,soc|||SE 3355|Technology and business models of online commerce.
+SE 3375|Programming Language Concepts|6|A|arch|||SE 1108|Paradigms, type systems and language implementation.
+SE 4452|Management Information Systems|6|A|mgmt,soc|||SE 2230|Information systems in organizations.
+SE 4453|Software Change, Configuration and Release Management|6|A|mgmt|||SE 3318|Version control, CI/CD and release processes.
+SE 4454|Software Metrics|6|A|mgmt|||SE 2226|Measuring software size, quality and productivity.
+SE 4455|Distributed Software Engineering|6|A|arch|||SE 3310|Designing software that runs across machines.
+SE 4457|Formal Methods and Models in Software Engineering|6|A|arch|||COMP 1202|Specifying and verifying software mathematically.
+SE 4460|Component-Based Software Development|6|A|arch|||SE 3317|Building systems from reusable components.
+SE 4461|Reusable Software Architectures|6|A|arch|||SE 3317|Frameworks, product lines and architectural reuse.
+SE 4463|Multimedia Information Systems|6|A|web|||SE 2230|Storing and retrieving images, audio and video.
+SE 4464|Geographic Information Systems|6|A|ai|||SE 2230|Spatial data, maps and location-based analysis.
+SE 4465|Web Engineering|6|A|web|||SE 3355|Engineering large web applications.
+SE 4475x|-|0|X|||||
+SE 4491|Introduction to Bioinformatics|6|A|ai|||SE 2310|Algorithms for biological sequence data.
+SE 4492|Introduction to Metaheuristic Algorithms|6|A|ai|||SE 2228|Genetic algorithms, simulated annealing and more.
+COMP 4318|Distributed Systems|6|A|arch|||SE 3310|Consistency, replication and fault tolerance.
+COMP 4360|Image Processing|6|A|ai|||MATH 2255|Filtering, segmentation and feature extraction.
+COMP 4437|Artificial Neural Networks|6|A|ai|||MATH 2255|Perceptrons, backpropagation and network design.
+COMP 4439|Computer Network Programming|6|A|sec|||SE 3310|Sockets and network protocol programming.
+COMP 4442|Data Warehouses|6|A|ai|||SE 2230|Dimensional modelling and ETL.
+COMP 4480|Introduction to Intelligent and Autonomous Systems|6|A|robo,ai|||SE 3332|Autonomy, perception and decision making.
+ME 4240|Introduction to Robot Mechanics|6|B|robo|||MATH 2255|Mechanics of robot arms: kinematics, dynamics and actuation.
+ME 4610|Introduction to Mechatronics Engineering|6|B|robo|||EEE 2110|Combining mechanics, electronics and software.
+ENGR 4451|Generative AI for Engineering Applications|6|B|ai|||MATH 2260|Using generative models to solve engineering problems.
+EEE 4540|Image and Video Processing|6|B|ai|||MATH 2255|Processing and analysing images and video streams.
+EEE 4531|Digital Signal Processing|6|B|ai|||MATH 2255|Sampling, filtering and spectral analysis.
+IE 4553|Combinatorial Optimization|6|B|ai|||SE 2228|Optimization over discrete structures.
+IE 4554|Network Science and Applications|6|B|ai,soc|||COMP 1202|Analysing complex networks.
+NMED 3555|Extended Reality|6|B|games|||SE 3318|Designing VR and AR experiences.
+VCDS 3501|Creative Coding|6|B|games,ux|||SE 1108|Code as a medium for visual design.
+VCDS 3509|Web Design I|6|B|web,ux|||SE 3355|Visual design for the web.
+VCDS 4503|Introduction to 3D Animation|6|B|games|||-|Modelling and animating in 3D.
+NMED 0113|Introduction to Social Network Analysis|5|U|ai,soc|||-|Mapping and measuring social networks.
+BA 3010|Principles of Management|5|U|mgmt,soc|||-|How organizations are planned, led and controlled.
+PSYC 0100|Introduction to Psychology|5|U|soc|||-|Foundations of human behaviour and mind.
+ID 0450|Design Thinking|5|U|ux|||-|Human-centred problem solving.
+COMP 0375|Cybersecurity Awareness|5|U|sec|||-|Staying safe online.
+SCUL 0700|Social Entrepreneurship|5|U|soc|||-|Ventures that create social value.
+SOFL 1611|German I|4|U|soc|||-|Beginner German.
+SOFL 1621|Italian I|4|U|soc|||-|Beginner Italian.
+VCDS 0200|Introduction to Photography|5|U|ux|||-|Light, composition and the camera.
+`;
+const COURSES = RAW.trim().split("\n").map(l=>l.split("|")).filter(p=>p[3]!=="X").map(p=>{
+  const [code,name,ects,pool,tags,time,seat,builds,desc]=p;
+  let t=[]; if(time){const m=time.match(/(\w+) (\d\d:\d\d)-(\d\d:\d\d)/); t=[[m[1],m[2],m[3]]];}
+  let left=null,cap=null; if(seat){[left,cap]=seat.split("/").map(Number);}
+  return {code,name,ects:+ects,pool,tags:tags?tags.split(","):[],t,offered:!!time,left,cap,builds:builds&&builds!=="-"?builds.split(","):[],desc:desc||""};
+});
+const C = Object.fromEntries(COURSES.map(c=>[c.code,c]));
+
+const SLOTS = [
+  {id:"U1",label:"Univ. elective SE1",pool:"U",sem:5,term:"done",ects:5,courses:["PSYC 0100"]},
+  {id:"A1",label:"Dept. elective A1",pool:"A",sem:6,term:"done",ects:6,courses:["SE 3355"]},
+  {id:"F2",label:"Field elective A2",pool:"A",sem:7,term:"now",ects:6,courses:[]},
+  {id:"A2",label:"Dept. elective A2",pool:"A",sem:7,term:"now",ects:6,courses:[]},
+  {id:"A3",label:"Dept. elective A3",pool:"A",sem:7,term:"now",ects:6,courses:[]},
+  {id:"B1",label:"Dept. elective B1",pool:"B",sem:8,term:"plan",ects:6,courses:[]},
+  {id:"B2",label:"Dept. elective B2",pool:"B",sem:8,term:"plan",ects:6,courses:[]},
+  {id:"U3",label:"Univ. elective SE3",pool:"U",sem:8,term:"plan",ects:9,courses:[]},
+];
+const POOLNAME={A:"A pool",B:"B pool",U:"University"};
+const POOLCLS={A:"tA",B:"tB",U:"tU"};
+
+/* ===================== STATE ===================== */
+const S = {interests:new Set(), fit:false, seat:false, term:false, q:"", submitted:false};
+const taken = new Set(["SE 3355","PSYC 0100"]);
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s);
+const mins=t=>{const [h,m]=t.split(":").map(Number);return h*60+m};
+function overlap(a,b){return a[0]===b[0] && mins(a[1])<mins(b[2]) && mins(b[1])<mins(a[2]);}
+function chosenNow(){return SLOTS.filter(s=>s.term==="now").flatMap(s=>s.courses);}
+function clashWith(c,ignore){
+  if(!c.t.length) return null;
+  for(const k of COMPULSORY){for(const a of c.t)for(const b of k.t) if(overlap(a,b)) return {code:k.code,name:k.name,slot:b};}
+  for(const code of chosenNow()){ if(code===c.code||code===ignore) continue; const o=C[code]; for(const a of c.t)for(const b of o.t) if(overlap(a,b)) return {code:o.code,name:o.name,slot:b};}
+  return null;
+}
+function slotOf(code){return SLOTS.find(s=>s.courses.includes(code));}
+function openNowSlots(pool){return SLOTS.filter(s=>s.term==="now"&&s.pool===pool&&!s.courses.length);}
+function score(c){
+  let interest = 0.18;
+  if(S.interests.size){const m=c.tags.filter(t=>S.interests.has(t)).length; interest = m? 0.55+0.08*(m-1) : 0.12;}
+  let b=0.1, gs=c.builds.filter(x=>GRADES[x]&&GP[GRADES[x]]);
+  if(gs.length) b = 0.33*gs.reduce((s,x)=>s+GP[GRADES[x]],0)/gs.length/4;
+  const ok = c.offered && c.left>0 && !clashWith(c) ? 0.1 : 0;
+  return Math.min(0.98, interest+b+ok);
+}
+function fmtT(c){return c.t.length? c.t.map(x=>`${x[0]} ${x[1]}–${x[2]}`).join(", ") : (c.pool==="A"?"Not offered this fall":"Offered in spring");}
+function ectsNow(){return COMPULSORY.reduce((s,c)=>s+c.ects,0)+chosenNow().reduce((s,c)=>s+C[c].ects,0);}
+function toast(msg){const t=$("#toast");t.innerHTML=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
+const ICON_OK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6 9 17l-5-5"/></svg>';
+const ICON_X='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const ICON_CLOCK='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
+/* ===================== RENDER ===================== */
+function renderHomeDots(){ $("#home-dots").innerHTML = SLOTS.map(s=>`<div class="dot ${s.term==="done"?"done":s.term==="now"?"now":""}"></div>`).join(""); }
+
+function renderSlots(){
+  $("#slots").innerHTML = SLOTS.map(s=>{
+    const filled=s.courses.length>0, sum=s.courses.reduce((a,c)=>a+C[c].ects,0);
+    const st = s.term==="done"?'<span class="tag tOk">Completed</span>':s.term==="now"?'<span class="tag tNow">This term</span>':'<span class="tag tPlan">Spring</span>';
+    const crs = filled? s.courses.map(c=>`<div class="crs">${c}<small>${C[c].name}</small></div>`).join("") : `<div class="crs" style="color:var(--ink3);font-weight:500">Empty · needs ${s.ects} ECTS</div>`;
+    const x = filled && s.term!=="done" ? `<button class="xbtn" data-unslot="${s.id}" title="Remove">✕</button>`:"";
+    return `<div class="slot ${s.term} ${filled?"filled":""}" id="slot-${s.id}">${x}
+      <div class="sl-top"><span class="tag ${POOLCLS[s.pool]}">${s.pool==="U"?"U":s.pool}</span>${st}</div>
+      <div class="nm">${s.label}</div><div class="meta">Sem ${s.sem} · ${s.ects} ECTS${s.pool==="U"&&sum&&sum<s.ects?` · ${sum}/${s.ects}`:""}</div>${crs}</div>`;
+  }).join("");
+  const done=SLOTS.filter(s=>s.courses.length).length;
+  const now=SLOTS.filter(s=>s.term==="now"), nf=now.filter(s=>s.courses.length).length;
+  $("#st-slots").textContent=`${done} / ${SLOTS.length}`;
+  $("#st-now").textContent=`${nf} / ${now.length} filled`;
+  $("#st-now").style.color = nf===now.length? "var(--ok)":"var(--ink)";
+  const e=ectsNow(); $("#st-ects").textContent=`${e} / 40`; $("#st-bar").style.width=(e/40*100)+"%";
+  $("#st-bar").style.background = e>40?"var(--bad)":"var(--brand)";
+}
+
+function renderChips(){
+  $("#chips").innerHTML = TOPICS.map(t=>`<button class="chip ${S.interests.has(t.id)?"on":""}" data-topic="${t.id}">${S.interests.has(t.id)?ICON_OK:""}${t.label}</button>`).join("");
+}
+
+function visibleCourses(){
+  const q=S.q.trim().toLowerCase();
+  let list = COURSES.filter(c=>!taken.has(c.code));
+  if(q){ list = list.filter(c=>(c.code+" "+c.name).toLowerCase().includes(q.replace(/\s+/g," "))); }
+  else { list = list.filter(c=>c.pool==="A" && c.offered); }
+  if(S.term) list=list.filter(c=>c.pool==="A"&&c.offered);
+  if(S.fit) list=list.filter(c=>!c.offered || !clashWith(c) || slotOf(c.code));
+  if(S.seat) list=list.filter(c=>!c.offered || c.left>0 || slotOf(c.code));
+  return list.sort((a,b)=>score(b)-score(a));
+}
+
+function whyText(c){
+  const parts=[];
+  const m=c.tags.filter(t=>S.interests.has(t)).map(t=>TOPICS.find(x=>x.id===t).label);
+  if(m.length) parts.push(`Matches <b>${m.join(" + ")}</b>`);
+  const gs=c.builds.filter(x=>GRADES[x]);
+  if(gs.length) parts.push(`builds on ${gs.map(x=>`<b>${NAMES[x]||x}</b> (${GRADES[x]})`).join(" and ")}`);
+  if(!parts.length) parts.push(c.desc);
+  let s=parts.join(", "); return s.charAt(0).toUpperCase()+s.slice(1)+".";
+}
+
+function renderList(){
+  const list=visibleCourses();
+  $("#count").textContent = `${list.length} course${list.length===1?"":"s"}`;
+  if(!list.length){$("#list").innerHTML='<div class="empty">No electives match. Try removing a filter.</div>';return;}
+  $("#list").innerHTML = list.map(c=>{
+    const sc=Math.round(score(c)*100), inSlot=slotOf(c.code), cl=c.offered?clashWith(c):null;
+    const badges=[`<span class="tag ${POOLCLS[c.pool]}">${POOLNAME[c.pool]}</span>`,`<span class="tag tGray">${c.ects} ECTS</span>`];
+    if(c.offered){ if(c.left===0) badges.push('<span class="tag tBad">Full · 0 seats</span>'); else badges.push(`<span class="tag ${c.left<=5?"tWarn":"tOk"}">${c.left} seats left</span>`); }
+    else if(c.pool!=="A") badges.push('<span class="tag tPlan">Spring only</span>');
+    if(cl && !inSlot) badges.push(`<span class="tag tBad">Clashes with ${cl.code}</span>`);
+    const action = inSlot? `<button class="btn btn-ok btn-sm" disabled>${ICON_OK}Added to ${inSlot.id==="F2"?"Field A2":inSlot.id}</button>`
+                         : `<button class="btn btn-primary btn-sm" data-add="${c.code}">Add to a slot</button>`;
+    return `<div class="cc ${inSlot?"added":""} ${(cl&&!inSlot)||c.left===0?"dim":""}" id="cc-${c.code.replace(" ","")}">
+      <div class="r1"><div><div class="code">${c.code}</div><div class="name">${c.name}</div></div>
+        ${S.interests.size?`<div class="match"><b>${sc}%</b><span>match</span></div>`:""}</div>
+      <div class="row">${badges.join("")}</div>
+      <div class="when">${ICON_CLOCK} ${fmtT(c)}</div>
+      <div class="why">${whyText(c)}</div>
+      <div class="acts"><button class="btn btn-ghost btn-sm" data-info="${c.code}">Details</button>${action}</div></div>`;
+  }).join("");
+}
+
+function renderReg(){
+  const rows=[...COMPULSORY.map(c=>({...c,as:"Compulsory"})), ...SLOTS.filter(s=>s.term==="now"&&s.courses.length).flatMap(s=>s.courses.map(code=>({...C[code],as:s.label})))];
+  $("#reg-table").innerHTML=`<table><tr><th>Code</th><th>Course</th><th>Taken as</th><th>Time</th><th class="r">ECTS</th></tr>${rows.map(r=>`<tr><td><b>${r.code}</b></td><td>${r.name}</td><td>${r.as}</td><td>${r.t.length?r.t.map(x=>`${x[0]} ${x[1]}–${x[2]}`).join(", "):"—"}</td><td class="r">${r.ects}</td></tr>`).join("")}<tr><td></td><td><b>Total</b></td><td></td><td></td><td class="r"><b>${ectsNow()} / 40</b></td></tr></table>`;
+}
+
+function renderAll(){renderSlots();renderChips();renderList();renderReg();renderHomeDots();}
+
+/* ===================== DRAWER / MODALS ===================== */
+function openScrim(){ $("#scrim").classList.add("show"); }
+function closeAll(){ $("#scrim").classList.remove("show"); $("#drawer").classList.remove("show"); $("#modal").classList.remove("show"); }
+
+function openInfo(code){
+  const c=C[code], cl=c.offered?clashWith(c):null, inSlot=slotOf(code);
+  const valid=SLOTS.filter(s=>s.pool===c.pool);
+  $("#drawer").innerHTML=`<div class="dr-h"><div class="code">${c.code}</div><h3>${c.name}</h3>
+      <div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag ${POOLCLS[c.pool]}">${POOLNAME[c.pool]}</span><span class="tag tGray">${c.ects} ECTS</span>${c.offered?`<span class="tag ${c.left===0?"tBad":"tOk"}">${c.left===0?"Full":c.left+" of "+c.cap+" seats left"}</span>`:""}</div></div>
+    <div class="dr-b">
+      <div><h4>About</h4><p>${c.desc}</p></div>
+      <div class="facts">
+        <div class="fact"><span>This term</span><b>${fmtT(c)}</b></div>
+        <div class="fact"><span>Weekly hours</span><b>3 h lecture</b></div>
+        <div class="fact"><span>Builds on</span><b>${c.builds.length?c.builds.map(x=>`${x}${GRADES[x]?" ("+GRADES[x]+")":""}`).join(", "):"—"}</b></div>
+        <div class="fact"><span>Timetable</span><b style="color:${cl?"var(--bad)":"var(--ok)"}">${!c.offered?"—":cl?"Clashes with "+cl.code:"No clash"}</b></div>
+      </div>
+      <div><h4>Counts toward</h4><div class="counts">${SLOTS.map(s=>{const ok=s.pool===c.pool;return `<div><span class="tag ${ok?"tOk":"tGray"}">${ok?ICON_OK:ICON_X}</span><span style="color:${ok?"var(--ink)":"var(--ink3)"}">${s.label}</span><span style="margin-left:auto;font-size:12px;color:var(--ink3)">Sem ${s.sem}${s.term==="done"?" · completed":""}</span></div>`}).join("")}</div></div>
+    </div>
+    <div class="dr-f"><button class="btn btn-ghost" data-close>Close</button>${inSlot?`<button class="btn btn-ok" disabled>${ICON_OK}Added</button>`:`<button class="btn btn-primary" data-add="${c.code}">Add to a slot</button>`}</div>`;
+  openScrim(); $("#drawer").classList.add("show");
+}
+
+function similarFor(c,pool){
+  return COURSES.filter(x=>x.pool===pool && x.offered && !taken.has(x.code) && !slotOf(x.code) && x.left>0 && !clashWith(x) && x.tags.some(t=>c.tags.includes(t)))
+    .sort((a,b)=>score(b)-score(a)).slice(0,3);
+}
+
+function startAdd(code){
+  const c=C[code];
+  $("#drawer").classList.remove("show");
+  const cl=c.offered?clashWith(c):null;
+  const open=SLOTS.filter(s=>s.term==="now"&&s.pool===c.pool&&!s.courses.length);
+  if(!c.offered || !open.length){
+    // explain why it doesn't count + alternatives
+    const poolSlots=SLOTS.filter(s=>s.pool===c.pool).map(s=>s.label.replace("Dept. elective ","").replace("Univ. elective ","")).join(" / ");
+    const alts=similarFor(c,"A"), target=openNowSlots("A")[0];
+    $("#modal").innerHTML=`<div class="m-h"><span class="ic" style="background:var(--bad-soft);color:var(--bad)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+        <div><h3>${c.code} won't count this term</h3><p>${c.name}</p></div></div>
+      <div class="m-b"><div class="why-box"><b>${c.code}</b> belongs to the <b>${POOLNAME[c.pool]}</b>, so it only counts for <b>${poolSlots}</b> in semester ${SLOTS.find(s=>s.pool===c.pool).sem}${c.offered?"":", and it is only offered in spring"}. This term's open slots (Field A2, A2, A3) accept <b>A pool</b> courses only. If you register for it now, it adds ${c.ects} ECTS that don't move you closer to graduation.</div>
+        ${alts.length&&target?`<div style="margin:16px 0 4px;font-weight:700">Similar courses that do count for ${target.label}</div>`+alts.map(a=>`<div class="alt"><span class="tag tA">A</span><div><div class="name">${a.code} · ${a.name}</div><div class="sub">${fmtT(a)} · ${a.left} seats left · no clash</div></div><button class="btn btn-primary btn-sm" data-put="${a.code}" data-slot="${target.id}">Add to ${target.id==="F2"?"Field A2":target.id}</button></div>`).join(""):""}
+        ${c.pool==="B"?`<div style="margin-top:14px;font-size:12.5px;color:var(--ink2)">Tip: you can still plan ${c.code} for slot B1 or B2 next spring with “Draft my spring plan”.</div>`:""}
+      </div><div class="m-f"><button class="btn btn-ghost" data-close>Close</button></div>`;
+    openScrim(); $("#modal").classList.add("show"); return;
+  }
+  if(cl){ toast(`${ICON_X} ${c.code} clashes with ${cl.code} (${cl.slot[0]} ${cl.slot[1]})`); closeAll(); return; }
+  if(c.left===0){ toast(`${ICON_X} ${c.code} is full`); closeAll(); return; }
+  $("#modal").innerHTML=`<div class="m-h"><span class="ic">${ICON_OK}</span><div><h3>Add ${c.code} to which slot?</h3><p>${c.name} counts for these open slots this term.</p></div></div>
+    <div class="m-b"><div class="slotpick">${open.map(s=>`<button data-put="${c.code}" data-slot="${s.id}"><span class="tag tA">A</span><b>${s.label}</b><small>Sem ${s.sem} · ${s.ects} ECTS</small></button>`).join("")}</div></div>
+    <div class="m-f"><button class="btn btn-ghost" data-close>Cancel</button></div>`;
+  openScrim(); $("#modal").classList.add("show");
+}
+
+function put(code,slotId,quiet){
+  const s=SLOTS.find(x=>x.id===slotId); s.courses=[code];
+  closeAll(); renderAll();
+  const el=$("#slot-"+slotId); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  if(!quiet) toast(`${ICON_OK} ${code} added to ${s.label}`);
+}
+
+function autofill(){
+  const open=SLOTS.filter(s=>s.term==="now"&&!s.courses.length);
+  if(!open.length){toast("All slots for this term are already filled");return;}
+  for(const s of open){
+    const best=COURSES.filter(c=>c.pool===s.pool&&c.offered&&!taken.has(c.code)&&!slotOf(c.code)&&c.left>0&&!clashWith(c)).sort((a,b)=>score(b)-score(a))[0];
+    if(best) s.courses=[best.code];
+  }
+  renderAll(); open.forEach(s=>{const el=$("#slot-"+s.id); el.classList.add("flash");});
+  toast(`${ICON_OK} Filled ${open.length} slot${open.length>1?"s":""} with your best clash-free matches`);
+}
+
+function springPlan(){
+  const sc=c=>score(c);
+  const used=new Set();
+  for(const id of ["B1","B2"]){ const s=SLOTS.find(x=>x.id===id); const usedTags=new Set([...used].flatMap(u=>C[u].tags)); const best=COURSES.filter(c=>c.pool==="B"&&!used.has(c.code)&&!c.tags.some(t=>usedTags.has(t))).sort((a,b)=>sc(b)-sc(a))[0]; s.courses=[best.code]; used.add(best.code); }
+  // U3 needs exactly 9 ECTS: best single or pair
+  const U=COURSES.filter(c=>c.pool==="U"&&!taken.has(c.code)); let best=null,bv=-1;
+  for(let i=0;i<U.length;i++)for(let j=i+1;j<U.length;j++) if(U[i].ects+U[j].ects===9){const v=sc(U[i])+sc(U[j]); if(v>bv){bv=v;best=[U[i].code,U[j].code];}}
+  SLOTS.find(x=>x.id==="U3").courses=best.sort((a,b)=>C[b].ects-C[a].ects);
+  renderAll(); ["B1","B2","U3"].forEach(id=>$("#slot-"+id).classList.add("flash"));
+  toast(`${ICON_OK} Spring draft saved · you can change it any time`);
+}
+
+function review(){
+  const now=SLOTS.filter(s=>s.term==="now"), missing=now.filter(s=>!s.courses.length);
+  const rows=[...COMPULSORY.map(c=>({...c,as:"Compulsory"})), ...now.filter(s=>s.courses.length).flatMap(s=>s.courses.map(code=>({...C[code],as:s.label})))];
+  const clashes = chosenNow().filter(c=>clashWith(C[c]));
+  const e=ectsNow();
+  $("#modal").innerHTML=`<div class="m-h"><div><h3>Registration summary</h3><p>Demo Student · semester 7 · 2026–2027 Fall</p></div></div>
+    <div class="m-b"><table><tr><th>Code</th><th>Course</th><th>Taken as</th><th class="r">ECTS</th></tr>
+      ${rows.map(r=>`<tr><td><b>${r.code}</b></td><td>${r.name}</td><td>${r.as}</td><td class="r">${r.ects}</td></tr>`).join("")}
+      <tr><td></td><td><b>Total</b></td><td></td><td class="r"><b>${e} / 40</b></td></tr></table>
+      ${missing.length?`<div class="why-box" style="margin-top:14px">${missing.length} elective slot(s) still empty: ${missing.map(s=>s.label).join(", ")}.</div>`:
+      `<div class="checks"><div>${ICON_OK}Every elective is in a slot that accepts its pool</div><div>${ICON_OK}${clashes.length?"Clashes found":"No clashes with compulsory courses or each other"}</div><div>${ICON_OK}Seats available in every section</div><div>${ICON_OK}${e} of 40 ECTS — within your limit</div></div>`}
+    </div>
+    <div class="m-f"><button class="btn btn-ghost" data-close>Back</button><button class="btn btn-primary" id="btn-confirm" ${missing.length?"disabled style='opacity:.5'":""}>Send to advisor</button></div>`;
+  openScrim(); $("#modal").classList.add("show");
+}
+
+function confirmReg(){
+  S.submitted=true; $("#home-status").textContent="Pending advisor approval";
+  $("#modal").innerHTML=`<div class="m-h"><span class="ic" style="background:var(--ok-soft);color:var(--ok)">${ICON_OK}</span><div><h3>Sent for advisor approval</h3><p>Your advisor will see your elective plan with the reason each course counts.</p></div></div>
+    <div class="m-b" style="color:var(--ink2)">You'll get a notification when it is approved. Your spring draft is saved too.</div>
+    <div class="m-f"><button class="btn btn-ghost" data-close>Close</button><button class="btn btn-primary" id="btn-png"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download plan (PNG)</button></div>`;
+}
+
+/* ===================== PNG PLAN ===================== */
+function drawPlan(){
+  const W=1600,H=760,cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");
+  const F='Inter, system-ui, sans-serif';
+  g.fillStyle="#f3f5f9";g.fillRect(0,0,W,H);
+  const rr=(x,y,w,h,r,fill,stroke)=>{g.beginPath();g.roundRect(x,y,w,h,r);if(fill){g.fillStyle=fill;g.fill();}if(stroke){g.strokeStyle=stroke;g.lineWidth=2;g.stroke();}};
+  rr(40,40,W-80,H-80,24,"#fff");
+  g.fillStyle="#2f5bea";rr(80,80,56,56,14,"#2f5bea");
+  g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.arc(108,108,16,0,7);g.stroke();
+  g.fillStyle="#0f1b33";g.font=`700 34px ${F}`;g.fillText("Elective Plan",156,112);
+  g.fillStyle="#4a5672";g.font=`500 18px ${F}`;g.fillText("Yaşar University · Software Engineering · Demo Student (23070005678) · 2026–2027",156,138);
+  rr(W-360,84,280,40,20,"#fdf3e1");g.fillStyle="#b7791f";g.font=`700 16px ${F}`;g.fillText("Sent for advisor approval",W-340,110);
+  const cols=[["Completed","done","#14915f","#e3f6ed"],["This term · Fall","now","#2f5bea","#e8eeff"],["Next term · Spring (draft)","plan","#6d3dc0","#efe8fb"]];
+  const cw=(W-80*2-40*2)/3;
+  cols.forEach(([title,term,col,soft],i)=>{
+    const x=80+i*(cw+40),y=190;
+    g.fillStyle=col;g.font=`700 20px ${F}`;g.fillText(title,x,y);
+    let yy=y+22;
+    SLOTS.filter(s=>s.term===term).forEach(s=>{
+      const h=60+s.courses.length*46;
+      rr(x,yy,cw,h,16,soft);
+      g.fillStyle=col;g.font=`700 15px ${F}`;g.fillText(`${s.label.toUpperCase()}  ·  ${POOLNAME[s.pool]}  ·  ${s.ects} ECTS`,x+20,yy+32);
+      s.courses.forEach((c,k)=>{g.fillStyle="#0f1b33";g.font=`700 19px ${F}`;g.fillText(c,x+20,yy+70+k*46);g.fillStyle="#4a5672";g.font=`500 16px ${F}`;
+        let n=C[c].name; if(n.length>30)n=n.slice(0,29)+"…"; g.fillText(n,x+150,yy+70+k*46);});
+      yy+=h+16;
+    });
+  });
+  g.fillStyle="#8590a8";g.font=`500 15px ${F}`;g.fillText(`Fall total: ${ectsNow()} / 40 ECTS · every elective counted in a slot that accepts its pool · no clashes`,80,H-80);
+  g.fillText("Course project prototype — not the official Yaşar University system.",80,H-56);
+  return cv.toDataURL("image/png");
+}
+function downloadPNG(){
+  const url=drawPlan();
+  try{const a=document.createElement("a");a.href=url;a.download="elective-plan-23070005678.png";document.body.appendChild(a);a.click();a.remove();}catch(e){}
+  closeAll(); $("#sheet-img").src=url; go("sheet");
+}
+
+/* ===================== NAV / EVENTS ===================== */
+function go(p){
+  $("#toast").classList.remove("show");
+  ["home","reg","plan","sheet"].forEach(x=>$("#pg-"+x).classList.toggle("hidden",x!==p));
+  document.querySelectorAll(".nav a[data-go]").forEach(a=>a.classList.toggle("on",a.dataset.go===p));
+  window.scrollTo({top:0});
+}
+$("#btn-signin").onclick=()=>{ $("#signin").classList.add("hidden"); $("#app").classList.remove("hidden"); go("home"); };
+$("#btn-open-planner").onclick=()=>go("plan");
+document.querySelectorAll(".nav a[data-go]").forEach(a=>a.onclick=()=>go(a.dataset.go));
+$("#q").addEventListener("input",e=>{S.q=e.target.value;renderList();});
+[["#tg-fit","fit"],["#tg-seat","seat"],["#tg-term","term"]].forEach(([id,k])=>$(id).onclick=()=>{S[k]=!S[k];$(id).classList.toggle("on",S[k]);renderList();});
+$("#btn-autofill").onclick=autofill;
+$("#btn-spring").onclick=springPlan;
+$("#btn-review").onclick=review;
+$("#scrim").onclick=closeAll;
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-topic],[data-add],[data-info],[data-put],[data-close],[data-unslot],#btn-confirm,#btn-png");
+  if(!t) return;
+  if(t.dataset.topic){const id=t.dataset.topic; S.interests.has(id)?S.interests.delete(id):S.interests.add(id); renderChips(); renderList();}
+  else if(t.dataset.add) startAdd(t.dataset.add);
+  else if(t.dataset.info) openInfo(t.dataset.info);
+  else if(t.dataset.put) put(t.dataset.put,t.dataset.slot);
+  else if(t.dataset.unslot){SLOTS.find(s=>s.id===t.dataset.unslot).courses=[];renderAll();}
+  else if(t.id==="btn-confirm") confirmReg();
+  else if(t.id==="btn-png") downloadPNG();
+  else if(t.hasAttribute("data-close")) closeAll();
+});
+renderAll();
+</script>
+</body>
+</html>
